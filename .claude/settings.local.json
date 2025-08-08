@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm run lint)",
+      "Bash(mkdir:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(firebase deploy:*)",
+      "Bash(npm run build:*)",
+      "Bash(firebase login:*)"
+    ],
+    "deny": [
+      "Bash(git config *)",
+      "Bash(brew install *)",
+      "Bash(chmod 777 *)",
+      "Bash(rm -rf /*)",
+      "Bash(gh repo delete:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/scripts/deny-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

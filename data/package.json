@@ -1,0 +1,12 @@
+{
+  "name": "suno-mv-generator",
+  "version": "1.0.0",
+  "description": "Suno MV Generator - 音楽AIのSunoからMVまでのフローを管理するWebアプリ",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -c-1 --cors",
+    "dev": "npx http-server . -p 3000 -c-1 --cors"
+  },
+  "keywords": ["suno", "music", "mv", "generator"],
+  "author": "",
+  "license": "MIT"
+}

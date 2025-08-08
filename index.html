@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suno MV Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Suno MV Generator</h1>
+            <p>音楽AIのSunoからMVまでのフローを管理するWebアプリ</p>
+            <div id="loading-indicator" class="loading-indicator">
+                <span>テンプレートデータを読み込み中...</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- ステップ1: ChatGPT-o3での曲作成 -->
+            <section class="step" id="step1">
+                <div class="step-header">
+                    <h2>ステップ 1: ChatGPT-o3での曲作成</h2>
+                    <span class="step-number">1</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="song-style">ざっくりとした曲のスタイル（最大3つまで選択可能）:</label>
+                    <div class="input-container">
+                        <div class="input-with-button">
+                            <div class="multi-select-container">
+                                <div class="selected-tags" id="song-style-tags"></div>
+                                <input type="text" id="song-style" placeholder="例: ポップ、ロック、バラード" class="multi-input">
+                                <div class="input-controls">
+                                    <button type="button" class="select-btn" onclick="showTemplateSelector('song-style', 'songStyles')">📋</button>
+                                    <button type="button" class="random-btn" onclick="addRandomTemplate('song-style', 'songStyles')">🎲</button>
+                                    <button type="button" class="clear-btn" onclick="clearAllSelections('song-style')">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="template-detail" id="song-style-detail"></div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="lyrics-mood">ざっくりとした歌詞の雰囲気（最大3つまで選択可能）:</label>
+                    <div class="input-container">
+                        <div class="input-with-button">
+                            <div class="multi-select-container">
+                                <div class="selected-tags" id="lyrics-mood-tags"></div>
+                                <input type="text" id="lyrics-mood" placeholder="例: 青春、恋愛、友情" class="multi-input">
+                                <div class="input-controls">
+                                    <button type="button" class="select-btn" onclick="showTemplateSelector('lyrics-mood', 'lyricsMoods')">📋</button>
+                                    <button type="button" class="random-btn" onclick="addRandomTemplate('lyrics-mood', 'lyricsMoods')">🎲</button>
+                                    <button type="button" class="clear-btn" onclick="clearAllSelections('lyrics-mood')">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="template-detail" id="lyrics-mood-detail"></div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="vocal-features">声の特徴や口調（最大3つまで選択可能）:</label>
+                    <div class="input-container">
+                        <div class="input-with-button">
+                            <div class="multi-select-container">
+                                <div class="selected-tags" id="vocal-features-tags"></div>
+                                <input type="text" id="vocal-features" placeholder="例: 明るく元気な、透明感のある" class="multi-input">
+                                <div class="input-controls">
+                                    <button type="button" class="select-btn" onclick="showTemplateSelector('vocal-features', 'vocalFeatures')">📋</button>
+                                    <button type="button" class="random-btn" onclick="addRandomTemplate('vocal-features', 'vocalFeatures')">🎲</button>
+                                    <button type="button" class="clear-btn" onclick="clearAllSelections('vocal-features')">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="template-detail" id="vocal-features-detail"></div>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" onclick="generateStep1Prompt()">プロンプト生成</button>
+                
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>生成されたプロンプト</h3>
+                        <div class="template-info" id="template-info-step1"></div>
+                        <div class="output-buttons">
+                            <button class="copy-btn" onclick="copyToClipboard('step1-output')">コピー</button>
+                            <button class="clear-output-btn" onclick="clearOutput('step1-output')">消去</button>
+                        </div>
+                    </div>
+                    <textarea id="step1-output" readonly placeholder="プロンプトがここに表示されます"></textarea>
+                </div>
+            </section>
+
+            <!-- ステップ2: Sunoでの曲作成（手動） -->
+            <section class="step" id="step2">
+                <div class="step-header">
+                    <h2>ステップ 2: Sunoでの曲作成</h2>
+                    <span class="step-number">2</span>
+                </div>
+                
+                <div class="manual-step">
+                    <p>上記で生成されたプロンプトを使って、Sunoで曲を作成してください。</p>
+                    <div class="links-container">
+                        <a href="https://suno.com" target="_blank" class="external-link">Sunoを開く</a>
+                        <a href="https://chatgpt.com" target="_blank" class="external-link chatgpt-link">ChatGPTを開く</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ステップ3: Google AI Studioでの歌詞区切り -->
+            <section class="step" id="step3">
+                <div class="step-header">
+                    <h2>ステップ 3: Google AI Studioでの歌詞区切り</h2>
+                    <span class="step-number">3</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="song-duration">曲の長さ:</label>
+                    <div class="duration-input-container">
+                        <div class="duration-field">
+                            <input type="number" id="song-duration-minutes" placeholder="3" min="0" max="10" value="">
+                            <label for="song-duration-minutes">分</label>
+                        </div>
+                        <div class="duration-field">
+                            <input type="number" id="song-duration-seconds" placeholder="30" min="0" max="59" value="">
+                            <label for="song-duration-seconds">秒</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" onclick="generateStep3Prompt()">プロンプト生成</button>
+                
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>生成されたプロンプト</h3>
+                        <div class="output-buttons">
+                            <button class="copy-btn" onclick="copyToClipboard('step3-output')">コピー</button>
+                            <button class="clear-output-btn" onclick="clearOutput('step3-output')">消去</button>
+                        </div>
+                    </div>
+                    <textarea id="step3-output" readonly placeholder="プロンプトがここに表示されます"></textarea>
+                </div>
+
+                <div class="manual-step">
+                    <p>Sunoで作成した音声ファイルをGoogle AI Studioにアップロードし、上記プロンプトを使用してください。</p>
+                    <a href="https://aistudio.google.com" target="_blank" class="external-link">Google AI Studioを開く</a>
+                </div>
+            </section>
+
+            <!-- ステップ4: ChatGPT-o3でのVeo3用プロンプト作成 -->
+            <section class="step" id="step4">
+                <div class="step-header">
+                    <h2>ステップ 4: ChatGPT-o3でのVeo3用プロンプト作成</h2>
+                    <span class="step-number">4</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="original-lyrics">元の歌詞:</label>
+                    <div class="textarea-container">
+                        <textarea id="original-lyrics" placeholder="ステップ1で生成された歌詞を入力してください"></textarea>
+                        <button type="button" class="clear-textarea-btn" onclick="clearTextarea('original-lyrics')">✕</button>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="segmented-lyrics">8秒ごとに区切った歌詞:</label>
+                    <div class="textarea-container">
+                        <textarea id="segmented-lyrics" placeholder="ステップ3で得られた8秒区切りの歌詞を入力してください"></textarea>
+                        <button type="button" class="clear-textarea-btn" onclick="clearTextarea('segmented-lyrics')">✕</button>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="song-bpm">BPM:</label>
+                    <div class="input-container-simple">
+                        <input type="number" id="song-bpm" placeholder="例: 120" min="60" max="200">
+                        <button type="button" class="clear-input-btn" onclick="clearInput('song-bpm')">✕</button>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" onclick="generateStep4Prompt()">プロンプト生成</button>
+                
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>生成されたプロンプト</h3>
+                        <div class="output-buttons">
+                            <button class="copy-btn" onclick="copyToClipboard('step4-output')">コピー</button>
+                            <button class="clear-output-btn" onclick="clearOutput('step4-output')">消去</button>
+                        </div>
+                    </div>
+                    <textarea id="step4-output" readonly placeholder="プロンプトがここに表示されます"></textarea>
+                </div>
+            </section>
+
+            <!-- ステップ5: Gemini Veo3での動画作成 -->
+            <section class="step" id="step5">
+                <div class="step-header">
+                    <h2>ステップ 5: Gemini Veo3での動画作成</h2>
+                    <span class="step-number">5</span>
+                </div>
+                
+                <div class="manual-step">
+                    <p>上記で生成されたプロンプトを使って、Gemini Veo3で動画を作成してください。</p>
+                    <div class="links-container">
+                        <a href="https://gemini.google.com" target="_blank" class="external-link gemini-link">Geminiを開く</a>
+                        <a href="https://chatgpt.com" target="_blank" class="external-link chatgpt-link">ChatGPTを開く</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 Suno MV Generator</p>
+        </footer>
+    </div>
+
+    <!-- テンプレート選択モーダル -->
+    <div id="template-selector-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">テンプレートを選択</h3>
+                <span class="close-modal" onclick="closeTemplateSelector()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="template-list" class="template-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeTemplateSelector()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multi-Selection</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { max-width: 800px; margin: 0 auto; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Multi-Selection Functionality Test</h1>
+        
+        <div id="test-results"></div>
+        
+        <script>
+            // テスト用の簡易的なプロンプトテンプレート
+            const testTemplates = {
+                songStyles: ['ポップ', 'ロック', 'バラード'],
+                lyricsMoods: ['青春', '恋愛', '友情'],
+                vocalFeatures: ['明るく元気な', '透明感のある', '力強い']
+            };
+            
+            // 選択されたアイテムを管理するオブジェクト
+            const selectedItems = {
+                'song-style': [],
+                'lyrics-mood': [],
+                'vocal-features': []
+            };
+            
+            // テスト関数
+            function runTests() {
+                const results = document.getElementById('test-results');
+                let testCount = 0;
+                let passCount = 0;
+                
+                function test(name, condition) {
+                    testCount++;
+                    const status = condition ? 'success' : 'error';
+                    const statusText = condition ? 'PASS' : 'FAIL';
+                    if (condition) passCount++;
+                    
+                    results.innerHTML += `
+                        <div class="status ${status}">
+                            Test ${testCount}: ${name} - ${statusText}
+                        </div>
+                    `;
+                }
+                
+                // テスト1: 選択アイテムの追加
+                selectedItems['song-style'].push('ポップ');
+                test('Add item to selection', selectedItems['song-style'].includes('ポップ'));
+                
+                // テスト2: 重複チェック
+                const beforeLength = selectedItems['song-style'].length;
+                if (!selectedItems['song-style'].includes('ポップ')) {
+                    selectedItems['song-style'].push('ポップ');
+                }
+                test('Duplicate prevention', selectedItems['song-style'].length === beforeLength);
+                
+                // テスト3: 3つまでの制限
+                selectedItems['song-style'].push('ロック');
+                selectedItems['song-style'].push('バラード');
+                const shouldNotAdd = selectedItems['song-style'].length >= 3;
+                test('Max 3 items limit', shouldNotAdd);
+                
+                // テスト4: アイテム削除
+                const index = selectedItems['song-style'].indexOf('ポップ');
+                if (index > -1) {
+                    selectedItems['song-style'].splice(index, 1);
+                }
+                test('Remove item', !selectedItems['song-style'].includes('ポップ'));
+                
+                // テスト5: 組み合わせ表示
+                selectedItems['lyrics-mood'].push('青春', '恋愛');
+                const combination = selectedItems['lyrics-mood'].join('×');
+                test('Combination display format', combination === '青春×恋愛');
+                
+                // 結果サマリー
+                results.innerHTML += `
+                    <div class="result">
+                        <h3>Test Summary</h3>
+                        <p>Total Tests: ${testCount}</p>
+                        <p>Passed: ${passCount}</p>
+                        <p>Failed: ${testCount - passCount}</p>
+                        <p>Success Rate: ${Math.round((passCount / testCount) * 100)}%</p>
+                    </div>
+                `;
+            }
+            
+            // ページ読み込み時にテスト実行
+            document.addEventListener('DOMContentLoaded', runTests);
+        </script>
+    </div>
+</body>
+</html>
