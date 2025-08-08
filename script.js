@@ -570,6 +570,7 @@ function generateStep1Prompt() {
 function generateStep3Prompt() {
     const minutes = document.getElementById('song-duration-minutes').value.trim();
     const seconds = document.getElementById('song-duration-seconds').value.trim();
+    const interval = document.getElementById('segment-interval-seconds')?.value.trim() || '8';
     
     if (!minutes && !seconds) {
         alert('曲の長さを入力してください。');
@@ -594,13 +595,15 @@ function generateStep3Prompt() {
         durationText = `${totalSeconds}秒`;
     }
     
-    const prompt = `この音声を8秒毎に区切って歌詞を出力してください。秒数を入れてコピペしやすいようにコードブロックにして下さい。${durationText}（合計${totalDurationInSeconds}秒）の歌なので、全て8秒区切りで文字起こししてください`;
+    const intSec = Math.max(1, Math.min(60, parseInt(interval || '8', 10)));
+    const prompt = `この音声を${intSec}秒毎に区切って歌詞を出力してください。秒数を入れてコピペしやすいようにコードブロックにして下さい。${durationText}（合計${totalDurationInSeconds}秒）の歌なので、全て${intSec}秒区切りで文字起こししてください`;
     
     document.getElementById('step3-output').value = prompt;
     
     // 曲の長さをステップ4でも使用できるように保存
     localStorage.setItem('songDurationText', durationText);
     localStorage.setItem('songDurationSeconds', totalDurationInSeconds.toString());
+    localStorage.setItem('segmentIntervalSeconds', String(intSec));
     
     // アニメーション効果  
     animateOutput('step3-output');
@@ -615,6 +618,7 @@ function generateStep4Prompt() {
     // 保存された曲の長さを取得
     const songDurationText = localStorage.getItem('songDurationText') || '';
     const songDurationSeconds = localStorage.getItem('songDurationSeconds') || '';
+    const segmentIntervalSeconds = localStorage.getItem('segmentIntervalSeconds') || '8';
     
     if (!originalLyrics || !segmentedLyrics) {
         alert('元の歌詞と8秒ごとに区切った歌詞を入力してください。');
@@ -631,7 +635,7 @@ function generateStep4Prompt() {
     // BPMの表示を条件分岐
     const bpmText = songBpm && songBpm > 0 ? `プロンプトにはBPM${songBpm}も入れてください、` : '';
     
-    const prompt = `${songDurationText}の歌です。veo3で動画を作りたいので、元々生成した歌詞を参考に、下記8秒ごとに区切って文字起こしした歌詞に沿って、動画のプロンプトを8秒ずつに分けて作ってください。${bpmText}また動画内に文字が入らないようにしてください。コピペしやすいようにコードブロックで分けて、プロンプト内に通し番号も付けて下さい。プロンプトはすべて英語にしてください。
+    const prompt = `${songDurationText}の歌です。veo3で動画を作りたいので、元々生成した歌詞を参考に、下記${segmentIntervalSeconds}秒ごとに区切って文字起こしした歌詞に沿って、動画のプロンプトを${segmentIntervalSeconds}秒ずつに分けて作ってください。${bpmText}また動画内に文字が入らないようにしてください。コピペしやすいようにコードブロックで分けて、プロンプト内に通し番号も付けて下さい。プロンプトはすべて英語にしてください。
 
 ## 元の歌詞:
 ${originalLyrics}
@@ -768,6 +772,21 @@ function syncStepData() {
             // 他のステップでも同じ値を使用できるようにローカルストレージに保存
             localStorage.setItem('songDuration', this.value);
         });
+    }
+
+    // 区切り秒数の保存
+    const segmentIntervalInput = document.getElementById('segment-interval-seconds');
+    if (segmentIntervalInput) {
+        segmentIntervalInput.addEventListener('change', function() {
+            const intSec = Math.max(1, Math.min(60, parseInt(this.value || '8', 10)));
+            this.value = String(intSec);
+            localStorage.setItem('segmentIntervalSeconds', String(intSec));
+        });
+        // 再読込時に復元
+        const saved = localStorage.getItem('segmentIntervalSeconds');
+        if (saved) {
+            segmentIntervalInput.value = saved;
+        }
     }
 }
 
