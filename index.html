@@ -26,12 +26,13 @@
                 
                 <!-- 人物像（ペルソナ）選択 -->
                 <div class="input-group">
-                    <label for="persona">人物像（1つ選択）:</label>
+                    <label for="persona">人物像（1つ選択, 直接入力も可）:</label>
                     <div class="input-container">
                         <div class="input-with-button">
                             <input type="text" id="persona" placeholder="例: j-popアイドルグループ、ロックシンガー、カフェ店員">
                             <div class="input-controls">
                                 <button type="button" class="select-btn" onclick="showTemplateSelector('persona', 'personas')">📋</button>
+                                 <button type="button" class="random-btn" onclick="fillRandomTemplate('persona','personas')">🎲</button>
                                 <button type="button" class="clear-btn" onclick="clearInput('persona')">✕</button>
                             </div>
                         </div>
