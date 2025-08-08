@@ -251,41 +251,60 @@
                 </div>
             </section>
 
-            <!-- ステップ5: Gemini Veo3での動画作成 -->
+            <!-- ステップ5: 画像生成（ChatGPTでプロンプト整備 → 画像生成ツール） -->
             <section class="step" id="step5">
                 <div class="step-header">
-                    <h2>ステップ 5: Gemini Veo3での動画作成</h2>
+                    <h2>ステップ 5: 画像生成（ChatGPTでプロンプト整備 → Gemini(Veo3) / ChatGPT(Image) / Sora / ImageFX / Whisk / Midjourney など）</h2>
                     <span class="step-number">5</span>
                 </div>
                 
                 <div class="manual-step">
-                    <p>上記で生成されたプロンプトを使って、Gemini Veo3で動画を作成してください。</p>
+                    <p>ステップ4の内容をもとに、ChatGPT-5（Image）で画像生成用のプロンプトを整備し、Gemini(Veo3) / Sora / ImageFX / Whisk / Midjourney などで静止画を作成します。</p>
                     <div class="links-container">
-                        <a href="https://gemini.google.com" target="_blank" class="external-link gemini-link">Geminiを開く</a>
-                        <a href="https://chatgpt.com" target="_blank" class="external-link chatgpt-link">ChatGPTを開く</a>
+                        <a href="https://chatgpt.com" target="_blank" class="external-link chatgpt-link">ChatGPT（Image）</a>
+                        <a href="https://gemini.google.com" target="_blank" class="external-link gemini-link">Gemini (Veo3)</a>
+                        <a href="https://www.openai.com/research/sora" target="_blank" class="external-link">Sora</a>
+                        <a href="https://www.midjourney.com" target="_blank" class="external-link">Midjourney</a>
                     </div>
                 </div>
             </section>
 
-            <!-- ステップ6: Clipchampでの編集 -->
+            <!-- ステップ6: i2v（Image to Video）で動画生成（Sora / Gemini(Veo3) / Midjourney） -->
             <section class="step" id="step6">
                 <div class="step-header">
-                    <h2>ステップ 6: Clipchampで編集</h2>
+                    <h2>ステップ 6: i2v（Image to Video）で動画生成（Sora / Gemini(Veo3) / Midjourney）</h2>
                     <span class="step-number">6</span>
                 </div>
                 <div class="manual-step">
-                    <p>Gemini Veo3などで出力した動画を Clipchamp に読み込み、不要部分のトリミング、BGM/SEの調整、色調補正、書き出し設定などの仕上げ編集を行います。</p>
+                    <p>ステップ5で作成した画像と同じプロンプトを使用して、Sora / Gemini(Veo3) / Midjourney で i2v 動画を生成します。</p>
                     <div class="links-container">
-                        <a href="https://clipchamp.com/" target="_blank" class="external-link">Clipchampを開く</a>
+                        <a href="https://www.openai.com/research/sora" target="_blank" class="external-link">Sora</a>
+                        <a href="https://gemini.google.com" target="_blank" class="external-link gemini-link">Gemini (Veo3)</a>
+                        <a href="https://www.midjourney.com" target="_blank" class="external-link">Midjourney</a>
                     </div>
                 </div>
             </section>
 
-            <!-- ステップ7: Remotion + Claude Code で歌詞テロップ/エフェクト（上級者向け） -->
+            <!-- ステップ7: 動画編集（Windows: Clipchamp / macOS: iMovie など） -->
             <section class="step" id="step7">
                 <div class="step-header">
-                    <h2>ステップ 7: Remotion + Claude Codeで歌詞テロップ生成・エフェクト（上級者向け）</h2>
+                    <h2>ステップ 7: 動画編集（Windows: Clipchamp / macOS: iMovie など）</h2>
                     <span class="step-number">7</span>
+                </div>
+                <div class="manual-step">
+                    <p>Windowsでは Clipchamp、macOSでは iMovie 等を用いて、不要部分のトリミング、BGM/SEの調整、色調補正、書き出し設定などの仕上げ編集を行います。</p>
+                    <div class="links-container">
+                        <a href="https://clipchamp.com/" target="_blank" class="external-link">Clipchamp</a>
+                        <a href="https://www.apple.com/jp/imovie/" target="_blank" class="external-link">iMovie</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ステップ8: Remotion + Claude Code で歌詞テロップ/エフェクト（中～上級者向け） -->
+            <section class="step" id="step8">
+                <div class="step-header">
+                    <h2>ステップ 8: Remotion + Claude Codeで歌詞テロップ生成・エフェクト（中～上級者向け）</h2>
+                    <span class="step-number">8</span>
                 </div>
                 <div class="manual-step">
                     <p>ステップ4の8秒区切り歌詞をもとに、Remotionでテロップやトランジション/エフェクトをコードから生成します。Claude Code（VS Code拡張）を活用して、コンポーネント生成やタイムライン調整、アニメーションの試行錯誤を効率化できます。</p>
