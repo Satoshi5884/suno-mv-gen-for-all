@@ -511,9 +511,9 @@ function generateStep1Prompt() {
     const lyricsMoodText = document.getElementById('lyrics-mood').value.trim();
     const vocalFeaturesText = document.getElementById('vocal-features').value.trim();
     const personaText = (document.getElementById('persona')?.value || '').trim();
-    const personaGender = (document.querySelector('input[name="persona-gender"]:checked')?.value) || 'female';
-    const vocalCount = (document.querySelector('input[name="vocal-count"]:checked')?.value) || 'multiple';
-    const vocalGender = (document.querySelector('input[name="vocal-gender"]:checked')?.value) || 'female';
+    const personaGender = (document.querySelector('input[name="persona-gender"]:checked')?.value) || 'unset';
+    const vocalCount = (document.querySelector('input[name="vocal-count"]:checked')?.value) || 'unset';
+    const vocalGender = (document.querySelector('input[name="vocal-gender"]:checked')?.value) || 'unset';
     
     if (songStyles.length === 0 || lyricsMoods.length === 0 || vocalFeatures.length === 0) {
         alert('すべての項目を選択または入力してください。');
@@ -543,12 +543,22 @@ function generateStep1Prompt() {
     additionalSpecs = additionalSpecs.replace(/、$/, '');
     
     // まとめ文生成
-    const vocalCountJp = vocalCount === 'one' ? '1人' : (vocalCount === 'two' ? '2人' : '複数');
-    const vocalGenderJp = vocalGender === 'male' ? '男性' : '女性';
-    const personaGenderJp = personaGender === 'male' ? '男性' : '女性';
-    const personaPhrase = personaText ? `${personaGenderJp}${personaText}` : `${personaGenderJp}j-popアイドルグループ`;
+    const vocalCountJp = vocalCount === 'one' ? '1人' : (vocalCount === 'two' ? '2人' : (vocalCount === 'multiple' ? '複数' : ''));
+    const vocalGenderJp = vocalGender === 'male' ? '男性' : (vocalGender === 'female' ? '女性' : '');
+    const personaGenderJp = personaGender === 'male' ? '男性' : (personaGender === 'female' ? '女性' : '');
+    const personaPhrase = personaText
+        ? `${personaGenderJp ? personaGenderJp : ''}${personaText}`
+        : (personaGenderJp ? `${personaGenderJp}j-popアイドルグループ` : 'j-popアイドルグループ');
 
-    prompt += `\n\n上記の詳細情報を踏まえて、「${songStyles.join('×')}」の${personaPhrase}の楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。ボーカルは「${vocalFeatures.join('×')}」の${vocalCountJp}の${vocalGenderJp}ボーカルでお願いします。${additionalSpecs ? `追加で以下の指定も反映してください: ${additionalSpecs}。` : ''}歌詞とプロンプト、タイトルそれぞれをコードブロックにしてコピーしやすいようにして下さい
+    const baseLine = `上記の詳細情報を踏まえて、「${songStyles.join('×')}」の${personaPhrase}の楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。`;
+    const vocalModifiers = [];
+    if (vocalCountJp) vocalModifiers.push(vocalCountJp);
+    if (vocalGenderJp) vocalModifiers.push(vocalGenderJp);
+    const vocalSpec = vocalModifiers.length > 0
+        ? `ボーカルは「${vocalFeatures.join('×')}」の${vocalModifiers.join('の')}ボーカルでお願いします。`
+        : `ボーカルは「${vocalFeatures.join('×')}」でお願いします。`;
+
+    prompt += `\n\n${baseLine}${vocalSpec}${additionalSpecs ? `追加で以下の指定も反映してください: ${additionalSpecs}。` : ''}歌詞とプロンプト、タイトルそれぞれをコードブロックにしてコピーしやすいようにして下さい
 
 # 制約条件  
 - タイトルは平仮名に限らず出力してください。
@@ -900,9 +910,9 @@ function saveFormData() {
     });
     
     // ラジオ選択も保存
-    formData.personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'female';
-    formData.vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'one';
-    formData.vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'female';
+    formData.personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'unset';
+    formData.vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'unset';
+    formData.vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'unset';
     formData.personaExtra = document.getElementById('persona-extra')?.value || '';
 
     // マルチセレクションデータも保存
@@ -965,9 +975,9 @@ window.addEventListener('load', loadFormData);
 // 現在の設定をJSONとして収集
 function collectCurrentSettingsAsJson() {
     const persona = (document.getElementById('persona')?.value || '').trim();
-    const personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'female';
-    const vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'one';
-    const vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'female';
+    const personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'unset';
+    const vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'unset';
+    const vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'unset';
     const personaExtra = (document.getElementById('persona-extra')?.value || '').trim();
 
     return {
