@@ -19,24 +19,28 @@ async function loadPromptTemplates() {
         const songStyles = completeEmbeddedData.songStyles;
         const lyricsMoods = completeEmbeddedData.lyricsMoods;
         const vocalFeatures = completeEmbeddedData.vocalFeatures;
+        const personas = completeEmbeddedData.personas || {};
         
         console.log('JSON files loaded successfully:', {
             songStyles: Object.keys(songStyles).length,
             lyricsMoods: Object.keys(lyricsMoods).length,
-            vocalFeatures: Object.keys(vocalFeatures).length
+            vocalFeatures: Object.keys(vocalFeatures).length,
+            personas: Object.keys(personas).length
         });
         
         // オブジェクトのキーを配列として格納（ランダム選択用）
         promptTemplates = {
             songStyles: Object.keys(songStyles),
             lyricsMoods: Object.keys(lyricsMoods),
-            vocalFeatures: Object.keys(vocalFeatures)
+            vocalFeatures: Object.keys(vocalFeatures),
+            personas: Object.keys(personas)
         };
         
         // 詳細情報も保存
         promptTemplates.songStylesData = songStyles;
         promptTemplates.lyricsMoodsData = lyricsMoods;
         promptTemplates.vocalFeaturesData = vocalFeatures;
+        promptTemplates.personasData = personas;
         
         console.log('Templates loaded and processed successfully');
         
@@ -59,18 +63,21 @@ async function loadPromptTemplates() {
         const songStyles = completeEmbeddedData.songStyles;
         const lyricsMoods = completeEmbeddedData.lyricsMoods;
         const vocalFeatures = completeEmbeddedData.vocalFeatures;
+        const personas = completeEmbeddedData.personas || {};
         
         // オブジェクトのキーを配列として格納（ランダム選択用）
         promptTemplates = {
             songStyles: Object.keys(songStyles),
             lyricsMoods: Object.keys(lyricsMoods),
-            vocalFeatures: Object.keys(vocalFeatures)
+            vocalFeatures: Object.keys(vocalFeatures),
+            personas: Object.keys(personas)
         };
         
         // 詳細情報も保存
         promptTemplates.songStylesData = songStyles;
         promptTemplates.lyricsMoodsData = lyricsMoods;
         promptTemplates.vocalFeaturesData = vocalFeatures;
+        promptTemplates.personasData = personas;
         
         // フォールバック時もローディング表示を非表示にする
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -312,7 +319,8 @@ function showTemplateSelector(inputId, templateKey) {
     const titleMap = {
         'song-style': '曲のスタイルを選択',
         'lyrics-mood': '歌詞の雰囲気を選択',
-        'vocal-features': '声の特徴を選択'
+        'vocal-features': '声の特徴を選択',
+        'persona': '人物像を選択'
     };
     modalTitle.textContent = titleMap[inputId] || 'テンプレートを選択';
     
@@ -325,7 +333,7 @@ function showTemplateSelector(inputId, templateKey) {
         
         Object.keys(templates).forEach(templateName => {
             const template = templates[templateName];
-            const isSelected = selectedItems[inputId] && selectedItems[inputId].includes(templateName);
+            const isSelected = inputId !== 'persona' && selectedItems[inputId] && selectedItems[inputId].includes(templateName);
             
             const templateItem = document.createElement('div');
             templateItem.className = `template-item ${isSelected ? 'selected' : ''}`;
@@ -336,15 +344,25 @@ function showTemplateSelector(inputId, templateKey) {
             `;
             
             templateItem.addEventListener('click', function() {
-                // 既に選択されている場合は削除、そうでなければ追加
-                if (isSelected) {
-                    removeSelectedItem(inputId, templateName);
+                if (inputId === 'persona') {
+                    // ペルソナは単一選択・テキスト入力
+                    const input = document.getElementById('persona');
+                    if (input) {
+                        input.value = templateName;
+                        showTemplateDetail('persona', template);
+                        updateTemplateInfo();
+                    }
+                    closeTemplateSelector();
                 } else {
-                    addSelectedItem(inputId, templateName);
+                    // 既に選択されている場合は削除、そうでなければ追加
+                    if (isSelected) {
+                        removeSelectedItem(inputId, templateName);
+                    } else {
+                        addSelectedItem(inputId, templateName);
+                    }
+                    // モーダルを閉じる
+                    closeTemplateSelector();
                 }
-                
-                // モーダルを閉じる
-                closeTemplateSelector();
             });
             
             templateList.appendChild(templateItem);
@@ -392,58 +410,17 @@ function showTemplateDetail(inputId, details) {
     const detailElement = document.getElementById(detailId);
     
     if (detailElement) {
-        // カスタムキーワードがあるかチェック
-        const customKeywords = getCustomKeywords(inputId, details.name_jp);
-        const displayKeywords = customKeywords || details.keywords;
-        
-        const keywordsHtml = displayKeywords.map(keyword => 
+        // 表示専用のヒント（編集不可）
+        const keywordsHtml = (details.keywords || []).map(keyword => 
             `<span class="keyword-tag">${keyword}</span>`
         ).join('');
-        
+
         detailElement.innerHTML = `
             <h4>${details.name_jp} <span class="english-name">(${details.name_en})</span></h4>
-            <div class="description-container">
-                <textarea class="description-edit" data-input-id="${inputId}" data-item-name="${details.name_jp}" 
-                    placeholder="詳細説明を編集...">${getCustomDescription(inputId, details.name_jp) || details.description}</textarea>
-                <div class="edit-note">💡 説明を編集してプロンプトに反映できます</div>
-            </div>
-            <div class="keywords-section">
-                <div class="keywords-display">${keywordsHtml}</div>
-                <div class="keywords-edit-container">
-                    <textarea class="keywords-edit" data-input-id="${inputId}" data-item-name="${details.name_jp}" 
-                        placeholder="キーワードをカンマ区切りで入力（例: キーワード1, キーワード2, キーワード3）"
-                        rows="2">${displayKeywords.join(', ')}</textarea>
-                    <div class="edit-note">🏷️ キーワードを編集してプロンプトに反映できます</div>
-                </div>
-            </div>
+            <div class="description">${details.description || ''}</div>
+            <div class="keywords">${keywordsHtml}</div>
         `;
-        
-        // 編集用テキストエリアのイベントリスナーを追加
-        const editTextarea = detailElement.querySelector('.description-edit');
-        if (editTextarea) {
-            editTextarea.addEventListener('input', function() {
-                updateCustomDescription(inputId, details.name_jp, this.value);
-            });
-        }
-        
-        // キーワード編集用テキストエリアのイベントリスナーを追加
-        const keywordsTextarea = detailElement.querySelector('.keywords-edit');
-        if (keywordsTextarea) {
-            keywordsTextarea.addEventListener('input', function() {
-                const keywords = this.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
-                updateCustomKeywords(inputId, details.name_jp, keywords);
-                
-                // キーワードタグの表示を更新
-                const keywordsDisplay = detailElement.querySelector('.keywords-display');
-                if (keywordsDisplay) {
-                    const newKeywordsHtml = keywords.map(keyword => 
-                        `<span class="keyword-tag">${keyword}</span>`
-                    ).join('');
-                    keywordsDisplay.innerHTML = newKeywordsHtml;
-                }
-            });
-        }
-        
+
         // アクティブクラスを追加してアニメーション表示
         detailElement.classList.add('active');
         
@@ -512,67 +489,9 @@ function updateTemplateInfo() {
     }
 }
 
-// カスタム説明・キーワードを保存するオブジェクト
-let customDescriptions = {};
-let customKeywords = {};
+// 表示専用化に伴い、カスタム説明/キーワードの編集・反映機能は撤去
 
-// カスタム説明を更新する関数
-function updateCustomDescription(inputId, itemName, description) {
-    if (!customDescriptions[inputId]) {
-        customDescriptions[inputId] = {};
-    }
-    customDescriptions[inputId][itemName] = description;
-}
-
-// カスタムキーワードを更新する関数
-function updateCustomKeywords(inputId, itemName, keywords) {
-    if (!customKeywords[inputId]) {
-        customKeywords[inputId] = {};
-    }
-    customKeywords[inputId][itemName] = keywords;
-}
-
-// カスタム説明を取得する関数
-function getCustomDescription(inputId, itemName) {
-    return customDescriptions[inputId] && customDescriptions[inputId][itemName];
-}
-
-// カスタムキーワードを取得する関数  
-function getCustomKeywords(inputId, itemName) {
-    return customKeywords[inputId] && customKeywords[inputId][itemName];
-}
-
-// 詳細情報を取得するヘルパー関数（カスタム説明・キーワードを優先）
-function getDetailInfo(dataKey, itemName) {
-    if (promptTemplates[dataKey] && promptTemplates[dataKey][itemName]) {
-        const originalData = promptTemplates[dataKey][itemName];
-        
-        // カスタム説明・キーワードがあるかチェック
-        const inputIdMap = {
-            'songStylesData': 'song-style',
-            'lyricsMoodsData': 'lyrics-mood', 
-            'vocalFeaturesData': 'vocal-features'
-        };
-        
-        const inputId = inputIdMap[dataKey];
-        let result = { ...originalData };
-        
-        // カスタム説明があれば置き換え
-        if (inputId && customDescriptions[inputId] && customDescriptions[inputId][itemName]) {
-            result.description = customDescriptions[inputId][itemName];
-        }
-        
-        // カスタムキーワードがあれば置き換え
-        if (inputId && customKeywords[inputId] && customKeywords[inputId][itemName]) {
-            result.keywords = customKeywords[inputId][itemName];
-        }
-        
-        return result;
-    }
-    return null;
-}
-
-// ステップ1: ChatGPT-o3での曲作成プロンプト生成
+// ステップ1: ChatGPT-5での曲作成プロンプト生成
 function generateStep1Prompt() {
     // マルチセレクションの場合は選択されたアイテムを使用
     const songStyles = selectedItems['song-style'] && selectedItems['song-style'].length > 0 
@@ -591,6 +510,10 @@ function generateStep1Prompt() {
     const songStyleText = document.getElementById('song-style').value.trim();
     const lyricsMoodText = document.getElementById('lyrics-mood').value.trim();
     const vocalFeaturesText = document.getElementById('vocal-features').value.trim();
+    const personaText = (document.getElementById('persona')?.value || '').trim();
+    const personaGender = (document.querySelector('input[name="persona-gender"]:checked')?.value) || 'female';
+    const vocalCount = (document.querySelector('input[name="vocal-count"]:checked')?.value) || 'multiple';
+    const vocalGender = (document.querySelector('input[name="vocal-gender"]:checked')?.value) || 'female';
     
     if (songStyles.length === 0 || lyricsMoods.length === 0 || vocalFeatures.length === 0) {
         alert('すべての項目を選択または入力してください。');
@@ -598,54 +521,12 @@ function generateStep1Prompt() {
     }
     
     let prompt = `suno用の完璧な歌詞とプロンプト、タイトルを考えてください。`;
-    
-    // 音楽スタイルの詳細情報を追加
-    prompt += `\n\n## 音楽スタイル: ${songStyles.join('×')}`;
-    songStyles.forEach(style => {
-        const detail = getDetailInfo('songStylesData', style);
-        if (detail) {
-            prompt += `\n### ${style} (${detail.name_en})
-${detail.description}
-特徴キーワード: ${detail.keywords.join('、')}`;
-        }
-    });
-    // テキストボックスの内容を追加情報として含める
-    if (songStyleText && !songStyles.some(style => songStyleText.includes(style))) {
-        prompt += `\n### 追加指定: ${songStyleText}`;
-    }
-    
-    // 歌詞の雰囲気の詳細情報を追加
-    prompt += `\n\n## 歌詞の雰囲気: ${lyricsMoods.join('×')}`;
-    lyricsMoods.forEach(mood => {
-        const detail = getDetailInfo('lyricsMoodsData', mood);
-        if (detail) {
-            prompt += `\n### ${mood} (${detail.name_en})
-${detail.description}
-特徴キーワード: ${detail.keywords.join('、')}`;
-        }
-    });
-    // テキストボックスの内容を追加情報として含める
-    if (lyricsMoodText && !lyricsMoods.some(mood => lyricsMoodText.includes(mood))) {
-        prompt += `\n### 追加指定: ${lyricsMoodText}`;
-    }
-    
-    // ボーカル特徴の詳細情報を追加
-    prompt += `\n\n## ボーカル特徴: ${vocalFeatures.join('×')}`;
-    vocalFeatures.forEach(feature => {
-        const detail = getDetailInfo('vocalFeaturesData', feature);
-        if (detail) {
-            prompt += `\n### ${feature} (${detail.name_en})
-${detail.description}
-特徴キーワード: ${detail.keywords.join('、')}`;
-        }
-    });
-    // テキストボックスの内容を追加情報として含める
-    if (vocalFeaturesText && !vocalFeatures.some(feature => vocalFeaturesText.includes(feature))) {
-        prompt += `\n### 追加指定: ${vocalFeaturesText}`;
-    }
+
+    // 画面上の詳細見出しは出さず、最終まとめ文のみ生成
     
     // 追加指定の内容を構築
     let additionalSpecs = '';
+    const personaExtra = (document.getElementById('persona-extra')?.value || '').trim();
     if (songStyleText && !songStyles.some(style => songStyleText.includes(style))) {
         additionalSpecs += `音楽スタイル追加指定: ${songStyleText}、`;
     }
@@ -655,10 +536,19 @@ ${detail.description}
     if (vocalFeaturesText && !vocalFeatures.some(feature => vocalFeaturesText.includes(feature))) {
         additionalSpecs += `ボーカル特徴追加指定: ${vocalFeaturesText}、`;
     }
+    if (personaExtra) {
+        additionalSpecs += `人物像追加指定: ${personaExtra}、`;
+    }
     // 末尾のカンマを削除
     additionalSpecs = additionalSpecs.replace(/、$/, '');
     
-    prompt += `\n\n上記の詳細情報を踏まえて、「${songStyles.join('×')}」のj-pop女性アイドルグループの楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。ボーカルは「${vocalFeatures.join('×')}」の複数の女性ボーカルでお願いします。${additionalSpecs ? `追加で以下の指定も反映してください: ${additionalSpecs}。` : ''}歌詞とプロンプト、タイトルそれぞれをコードブロックにしてコピーしやすいようにして下さい
+    // まとめ文生成
+    const vocalCountJp = vocalCount === 'one' ? '1人' : (vocalCount === 'two' ? '2人' : '複数');
+    const vocalGenderJp = vocalGender === 'male' ? '男性' : '女性';
+    const personaGenderJp = personaGender === 'male' ? '男性' : '女性';
+    const personaPhrase = personaText ? `${personaGenderJp}${personaText}` : `${personaGenderJp}j-popアイドルグループ`;
+
+    prompt += `\n\n上記の詳細情報を踏まえて、「${songStyles.join('×')}」の${personaPhrase}の楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。ボーカルは「${vocalFeatures.join('×')}」の${vocalCountJp}の${vocalGenderJp}ボーカルでお願いします。${additionalSpecs ? `追加で以下の指定も反映してください: ${additionalSpecs}。` : ''}歌詞とプロンプト、タイトルそれぞれをコードブロックにしてコピーしやすいようにして下さい
 
 # 制約条件  
 - タイトルは平仮名に限らず出力してください。
@@ -716,7 +606,7 @@ function generateStep3Prompt() {
     animateOutput('step3-output');
 }
 
-// ステップ4: ChatGPT-o3でのVeo3用プロンプト生成
+// ステップ4: ChatGPT-5でのVeo3用プロンプト生成
 function generateStep4Prompt() {
     const originalLyrics = document.getElementById('original-lyrics').value.trim();
     const segmentedLyrics = document.getElementById('segmented-lyrics').value.trim();
@@ -831,22 +721,23 @@ function setupInputHandlers() {
             }
             
             // テンプレート情報を更新（ステップ1の入力フィールドの場合）
-            if (['song-style', 'lyrics-mood', 'vocal-features'].includes(this.id)) {
+            if (['song-style', 'lyrics-mood', 'vocal-features', 'persona', 'persona-extra'].includes(this.id)) {
                 updateTemplateInfo();
                 
                 // 手動入力時にも詳細情報を表示
                 const templateKeyMap = {
                     'song-style': 'songStylesData',
                     'lyrics-mood': 'lyricsMoodsData',
-                    'vocal-features': 'vocalFeaturesData'
+                    'vocal-features': 'vocalFeaturesData',
+                    'persona': 'personasData'
                 };
                 
                 const templateKey = templateKeyMap[this.id];
+                // 今回は説明・キーワードをプロンプトに入れない方針だが、UIの詳細表示は維持
                 if (templateKey && promptTemplates[templateKey] && promptTemplates[templateKey][this.value.trim()]) {
                     const details = promptTemplates[templateKey][this.value.trim()];
                     showTemplateDetail(this.id, details);
                 } else {
-                    // 該当する詳細情報がない場合は非表示
                     const detailElement = document.getElementById(this.id + '-detail');
                     if (detailElement) {
                         detailElement.classList.remove('active');
@@ -930,6 +821,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // JSONエクスポート/インポートの設定
+    const exportBtn = document.getElementById('export-settings-btn');
+    const importBtn = document.getElementById('import-settings-btn');
+    const importInput = document.getElementById('import-json-input');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            const data = collectCurrentSettingsAsJson();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const ts = new Date().toISOString().replace(/[:.]/g, '-');
+            a.href = url;
+            a.download = `suno-mv-gen-settings-${ts}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    if (importBtn && importInput) {
+        importBtn.addEventListener('click', function() {
+            importInput.click();
+        });
+        importInput.addEventListener('change', async function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const json = JSON.parse(text);
+                applySettingsFromJson(json);
+            } catch (err) {
+                alert('JSONの読み込みに失敗しました');
+                console.error(err);
+            } finally {
+                importInput.value = '';
+            }
+        });
+    }
 });
 
 // エラーハンドリング
@@ -948,10 +880,14 @@ function saveFormData() {
         }
     });
     
+    // ラジオ選択も保存
+    formData.personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'female';
+    formData.vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'one';
+    formData.vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'female';
+    formData.personaExtra = document.getElementById('persona-extra')?.value || '';
+
     // マルチセレクションデータも保存
     formData.selectedItems = selectedItems;
-    formData.customDescriptions = customDescriptions;
-    formData.customKeywords = customKeywords;
     
     localStorage.setItem('sunoMvGenFormData', JSON.stringify(formData));
 }
@@ -973,10 +909,18 @@ function loadFormData() {
                     updateSelectedDisplay(inputId);
                     updateCombinationDisplay(inputId);
                 });
-            } else if (id === 'customDescriptions') {
-                customDescriptions = formData[id] || {};
-            } else if (id === 'customKeywords') {
-                customKeywords = formData[id] || {};
+            } else if (id === 'personaGender') {
+                const radio = document.querySelector(`input[name="persona-gender"][value="${formData[id]}"]`);
+                if (radio) radio.checked = true;
+            } else if (id === 'vocalCount') {
+                const radio = document.querySelector(`input[name="vocal-count"][value="${formData[id]}"]`);
+                if (radio) radio.checked = true;
+            } else if (id === 'vocalGender') {
+                const radio = document.querySelector(`input[name="vocal-gender"][value="${formData[id]}"]`);
+                if (radio) radio.checked = true;
+            } else if (id === 'personaExtra') {
+                const element = document.getElementById('persona-extra');
+                if (element) element.value = formData[id];
             } else {
                 const element = document.getElementById(id);
                 if (element) {
@@ -998,3 +942,89 @@ window.addEventListener('beforeunload', saveFormData);
 
 // ページ読み込み時の復元  
 window.addEventListener('load', loadFormData);
+
+// 現在の設定をJSONとして収集
+function collectCurrentSettingsAsJson() {
+    const persona = (document.getElementById('persona')?.value || '').trim();
+    const personaGender = document.querySelector('input[name="persona-gender"]:checked')?.value || 'female';
+    const vocalCount = document.querySelector('input[name="vocal-count"]:checked')?.value || 'one';
+    const vocalGender = document.querySelector('input[name="vocal-gender"]:checked')?.value || 'female';
+    const personaExtra = (document.getElementById('persona-extra')?.value || '').trim();
+
+    return {
+        persona,
+        personaGender,
+        vocalCount,
+        vocalGender,
+        personaExtra,
+        selectedItems,
+        inputs: {
+            songStyleInput: document.getElementById('song-style')?.value || '',
+            lyricsMoodInput: document.getElementById('lyrics-mood')?.value || '',
+            vocalFeaturesInput: document.getElementById('vocal-features')?.value || ''
+        }
+    };
+}
+
+// JSONから設定を反映
+function applySettingsFromJson(json) {
+    try {
+        // 基本テキスト
+        if (json.inputs) {
+            if (typeof json.inputs.songStyleInput === 'string') {
+                const el = document.getElementById('song-style');
+                if (el) el.value = json.inputs.songStyleInput;
+            }
+            if (typeof json.inputs.lyricsMoodInput === 'string') {
+                const el = document.getElementById('lyrics-mood');
+                if (el) el.value = json.inputs.lyricsMoodInput;
+            }
+            if (typeof json.inputs.vocalFeaturesInput === 'string') {
+                const el = document.getElementById('vocal-features');
+                if (el) el.value = json.inputs.vocalFeaturesInput;
+            }
+        }
+
+        // 人物像
+        if (typeof json.persona === 'string') {
+            const el = document.getElementById('persona');
+            if (el) el.value = json.persona;
+        }
+        if (typeof json.personaExtra === 'string') {
+            const el = document.getElementById('persona-extra');
+            if (el) el.value = json.personaExtra;
+        }
+        if (typeof json.personaGender === 'string') {
+            const radio = document.querySelector(`input[name="persona-gender"][value="${json.personaGender}"]`);
+            if (radio) radio.checked = true;
+        }
+
+        // ボーカル
+        if (typeof json.vocalCount === 'string') {
+            const radio = document.querySelector(`input[name="vocal-count"][value="${json.vocalCount}"]`);
+            if (radio) radio.checked = true;
+        }
+        if (typeof json.vocalGender === 'string') {
+            const radio = document.querySelector(`input[name="vocal-gender"][value="${json.vocalGender}"]`);
+            if (radio) radio.checked = true;
+        }
+
+        // 選択済みテンプレート
+        if (json.selectedItems && typeof json.selectedItems === 'object') {
+            selectedItems = json.selectedItems;
+            ['song-style','lyrics-mood','vocal-features'].forEach(id => {
+                updateSelectedDisplay(id);
+                updateCombinationDisplay(id);
+            });
+        }
+
+        // （表示専用化のため）カスタム説明/キーワードは取り扱わない
+
+        updateTemplateInfo();
+        saveFormData();
+        alert('設定をインポートしました');
+    } catch (e) {
+        console.error(e);
+        alert('設定の反映に失敗しました');
+    }
+}

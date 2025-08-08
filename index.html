@@ -17,13 +17,46 @@
         </header>
 
         <main>
-            <!-- ステップ1: ChatGPT-o3での曲作成 -->
+            <!-- ステップ1: ChatGPT-5での曲作成 -->
             <section class="step" id="step1">
                 <div class="step-header">
-                    <h2>ステップ 1: ChatGPT-o3での曲作成</h2>
+                    <h2>ステップ 1: ChatGPT-5での曲作成</h2>
                     <span class="step-number">1</span>
                 </div>
                 
+                <!-- 人物像（ペルソナ）選択 -->
+                <div class="input-group">
+                    <label for="persona">人物像（1つ選択）:</label>
+                    <div class="input-container">
+                        <div class="input-with-button">
+                            <input type="text" id="persona" placeholder="例: j-popアイドルグループ、ロックシンガー、カフェ店員">
+                            <div class="input-controls">
+                                <button type="button" class="select-btn" onclick="showTemplateSelector('persona', 'personas')">📋</button>
+                                <button type="button" class="clear-btn" onclick="clearInput('persona')">✕</button>
+                            </div>
+                        </div>
+                        <div class="template-detail" id="persona-detail"></div>
+                    </div>
+                </div>
+
+                <!-- 人物像の性別選択 -->
+                <div class="input-group">
+                    <label>人物像の性別:</label>
+                    <div class="radio-group" id="persona-gender-group">
+                        <label class="radio-option"><input type="radio" name="persona-gender" value="female" checked> 女性</label>
+                        <label class="radio-option"><input type="radio" name="persona-gender" value="male"> 男性</label>
+                    </div>
+                </div>
+
+                <!-- 人物像 追加指定 -->
+                <div class="input-group">
+                    <label for="persona-extra">人物像に関する追加指定:</label>
+                    <div class="textarea-container">
+                        <textarea id="persona-extra" placeholder="例: 年齢、雰囲気、衣装、職業設定など"></textarea>
+                        <button type="button" class="clear-textarea-btn" onclick="clearTextarea('persona-extra')">✕</button>
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label for="song-style">ざっくりとした曲のスタイル（最大3つまで選択可能）:</label>
                     <div class="input-container">
@@ -77,9 +110,33 @@
                         <div class="template-detail" id="vocal-features-detail"></div>
                     </div>
                 </div>
+
+                <!-- ボーカル人数と性別選択 -->
+                <div class="input-group">
+                    <label>ボーカル人数:</label>
+                    <div class="radio-group" id="vocal-count-group">
+                        <label class="radio-option"><input type="radio" name="vocal-count" value="one" checked> 1人</label>
+                        <label class="radio-option"><input type="radio" name="vocal-count" value="two"> 2人</label>
+                        <label class="radio-option"><input type="radio" name="vocal-count" value="multiple"> 複数</label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>ボーカル性別:</label>
+                    <div class="radio-group" id="vocal-gender-group">
+                        <label class="radio-option"><input type="radio" name="vocal-gender" value="female" checked> 女性</label>
+                        <label class="radio-option"><input type="radio" name="vocal-gender" value="male"> 男性</label>
+                    </div>
+                </div>
                 
                 <button class="generate-btn" onclick="generateStep1Prompt()">プロンプト生成</button>
                 
+                <!-- 設定のエクスポート/インポート -->
+                <div class="output-buttons" style="margin-bottom: 10px;">
+                    <button class="copy-btn" id="export-settings-btn">設定をエクスポート(JSON)</button>
+                    <button class="clear-output-btn" id="import-settings-btn">設定をインポート(JSON)</button>
+                    <input type="file" id="import-json-input" accept="application/json" style="display:none" />
+                </div>
+
                 <div class="output-section">
                     <div class="output-header">
                         <h3>生成されたプロンプト</h3>
@@ -149,10 +206,10 @@
                 </div>
             </section>
 
-            <!-- ステップ4: ChatGPT-o3でのVeo3用プロンプト作成 -->
+            <!-- ステップ4: ChatGPT-5でのVeo3用プロンプト作成 -->
             <section class="step" id="step4">
                 <div class="step-header">
-                    <h2>ステップ 4: ChatGPT-o3でのVeo3用プロンプト作成</h2>
+                    <h2>ステップ 4: ChatGPT-5でのVeo3用プロンプト作成</h2>
                     <span class="step-number">4</span>
                 </div>
                 
@@ -206,6 +263,40 @@
                     <div class="links-container">
                         <a href="https://gemini.google.com" target="_blank" class="external-link gemini-link">Geminiを開く</a>
                         <a href="https://chatgpt.com" target="_blank" class="external-link chatgpt-link">ChatGPTを開く</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ステップ6: Clipchampでの編集 -->
+            <section class="step" id="step6">
+                <div class="step-header">
+                    <h2>ステップ 6: Clipchampで編集</h2>
+                    <span class="step-number">6</span>
+                </div>
+                <div class="manual-step">
+                    <p>Gemini Veo3などで出力した動画を Clipchamp に読み込み、不要部分のトリミング、BGM/SEの調整、色調補正、書き出し設定などの仕上げ編集を行います。</p>
+                    <div class="links-container">
+                        <a href="https://clipchamp.com/" target="_blank" class="external-link">Clipchampを開く</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ステップ7: Remotion + Claude Code で歌詞テロップ/エフェクト（上級者向け） -->
+            <section class="step" id="step7">
+                <div class="step-header">
+                    <h2>ステップ 7: Remotion + Claude Codeで歌詞テロップ生成・エフェクト（上級者向け）</h2>
+                    <span class="step-number">7</span>
+                </div>
+                <div class="manual-step">
+                    <p>ステップ4の8秒区切り歌詞をもとに、Remotionでテロップやトランジション/エフェクトをコードから生成します。Claude Code（VS Code拡張）を活用して、コンポーネント生成やタイムライン調整、アニメーションの試行錯誤を効率化できます。</p>
+                    <ul style="margin:10px 0 0 18px; color:#555;">
+                        <li>Remotionでタイムラインに沿った歌詞テロップを表示</li>
+                        <li>各ブロックにフェード/モーション/フィルター等のエフェクト付与</li>
+                        <li>CLIで動画レンダリング、あるいはRemotion Playerでプレビュー</li>
+                    </ul>
+                    <div class="links-container" style="margin-top:12px;">
+                        <a href="https://www.remotion.dev/" target="_blank" class="external-link">Remotion ドキュメント</a>
+                        <a href="https://www.anthropic.com/claude" target="_blank" class="external-link chatgpt-link">Claude（Claude Code）</a>
                     </div>
                 </div>
             </section>

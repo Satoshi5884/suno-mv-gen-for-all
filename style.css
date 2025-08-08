@@ -655,6 +655,28 @@ header p {
     transform: scale(1.05);
 }
 
+.radio-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8f9fa;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.radio-option input[type="radio"] {
+    accent-color: #667eea;
+}
+
 .combination-display {
     margin-top: 8px;
     padding: 8px 12px;
