@@ -338,6 +338,12 @@ header p {
     color: #555;
 }
 
+.citation-note {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
 .external-link {
     display: inline-block;
     background: #3498db;
