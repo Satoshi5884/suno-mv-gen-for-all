@@ -550,7 +550,7 @@ function generateStep1Prompt() {
         ? `${personaGenderJp ? personaGenderJp : ''}${personaText}`
         : (personaGenderJp ? `${personaGenderJp}j-popアイドルグループ` : 'j-popアイドルグループ');
 
-    const baseLine = `上記の詳細情報を踏まえて、「${songStyles.join('×')}」の${personaPhrase}の楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。`;
+    const baseLine = `「${songStyles.join('×')}」の${personaPhrase}の楽曲で、歌詞は「${lyricsMoods.join('×')}」をベースにしてください。`;
     const vocalModifiers = [];
     if (vocalCountJp) vocalModifiers.push(vocalCountJp);
     if (vocalGenderJp) vocalModifiers.push(vocalGenderJp);
