@@ -253,6 +253,14 @@
                     </div>
                 </div>
                 
+                <div class="input-group">
+                    <label for="video-description">どんな動画にするか（任意）:</label>
+                    <div class="textarea-container">
+                        <textarea id="video-description" placeholder="例: 夜の東京の街並みを舞台に、ネオンの光や雨の反射が印象的なサイバーパンク調。主人公の後ろ姿を中心に、疾走感と切なさを表現。"></textarea>
+                        <button type="button" class="clear-textarea-btn" onclick="clearTextarea('video-description')">✕</button>
+                    </div>
+                </div>
+                
                 <button class="generate-btn" onclick="generateStep4Prompt()">プロンプト生成</button>
                 
                 <div class="output-section">

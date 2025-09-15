@@ -624,6 +624,7 @@ function generateStep4Prompt() {
     const originalLyrics = document.getElementById('original-lyrics').value.trim();
     const segmentedLyrics = document.getElementById('segmented-lyrics').value.trim();
     const songBpm = document.getElementById('song-bpm').value.trim();
+    const videoDescription = (document.getElementById('video-description')?.value || '').trim();
     
     // 保存された曲の長さを取得
     const songDurationText = localStorage.getItem('songDurationText') || '';
@@ -645,7 +646,8 @@ function generateStep4Prompt() {
     // BPMの表示を条件分岐
     const bpmText = songBpm && songBpm > 0 ? `プロンプトにはBPM${songBpm}も入れてください、` : '';
     
-    const prompt = `${songDurationText}の歌です。veo3で動画を作りたいので、元々生成した歌詞を参考に、下記${segmentIntervalSeconds}秒ごとに区切って文字起こしした歌詞に沿って、動画のプロンプトを${segmentIntervalSeconds}秒ずつに分けて作ってください。${bpmText}また動画内に文字が入らないようにしてください。コピペしやすいようにコードブロックで分けて、プロンプト内に通し番号も付けて下さい。プロンプトはすべて英語にしてください。
+    const appendedDescription = videoDescription ? `\n${videoDescription}\n` : '';
+    const prompt = `${songDurationText}の歌です。veo3で動画を作りたいので、元々生成した歌詞を参考に、下記${segmentIntervalSeconds}秒ごとに区切って文字起こしした歌詞に沿って、動画のプロンプトを${segmentIntervalSeconds}秒ずつに分けて作ってください。${bpmText}また動画内に文字が入らないようにしてください。必要な動画の数だけ、画像用のプロンプトと動画用のプロンプトに分けてコピペしやすいように1プロンプトずつ、コードブロックで囲んで作成して下さい。IMG01、VID01、IMG02、VID02、...というようにそれぞれ番号を付けて生成して下さい。プロンプトはすべて英語にしてください。\n動画のスタイル: ${appendedDescription}
 
 ## 元の歌詞:
 ${originalLyrics}
